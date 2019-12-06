@@ -5,6 +5,13 @@ Function TextToPSList {
     $global:fuelReq[0] += get-content -path .\day1input.txt
 }
 
+#Next Steps: 
+# Make a checker fucntion to go between TexttoPSList and ArrayController. This will manage the creation of new rows in the matrix, iterating Index, and breaking the loop
+# The checker should look to see if the next round will create values <= 0, and if so insert 0 into the matrix
+# The checker also needs to see if all results in the next round will create values <= 0, and if so terminate the loop and tabulate values
+
+# Make a function that adds up all results from fuelReq[1] to fuelReq[n] into totalReq
+
 Function ArrayController {
 	$global:fuelReq += ,@() #needs to be logic controlled
 	foreach($mass in $global:fuelReq[$global:Index]) { #need to functionize
