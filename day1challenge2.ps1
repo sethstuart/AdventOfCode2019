@@ -1,66 +1,69 @@
 $global:Index = 0
 
+
 Function TextToPSList {
     $global:fuelReq = ,@()
-    $global:fuelReq[0] += get-content -path .\day1input.txt
+	$global:fuelReq[$global:Index] += get-content -path .\testinput.txt
+	StepCheck
 }
 
 #Next Steps: 
-# Make a checker fucntion to go between TexttoPSList and ArrayController. This will manage the creation of new rows in the matrix, iterating Index, and breaking the loop
-# The checker should look to see if the next round will create values <= 0, and if so insert 0 into the matrix
 # The checker also needs to see if all results in the next round will create values <= 0, and if so terminate the loop and tabulate values
-
 # Make a function that adds up all results from fuelReq[1] to fuelReq[n] into totalReq
 
 Function ArrayController {
-	$global:fuelReq += ,@() #needs to be logic controlled
-	foreach($mass in $global:fuelReq[$global:Index]) { #need to functionize
+	foreach($mass in $global:fuelReq[$global:Index]) {
 	    $m = ($mass / 3) - 2
 		$m = [math]::floor($m)
-		$global:fuelReq[$global:Index + 1] += $m
+		if($m -le 0) {
+			$global:fuelReq[$global:Index + 1] += 0
+		}
+		else {
+			$global:fuelReq[$global:Index + 1] += $m
+		}
+		$global:Index = $global:Index + 1
+		StepCheck
 	}
-	$global:Index = $global:Index + 1
+}
+
+Function StepCheck {
+	$rowTotalReq = 0
+	foreach($mass in $global:fuelReq[$global:Index]) {
+		$rowTotalReq = $rowTotalReq + $mass
+	}
+		if($rowTotalReq -gt 0) {
+			$global:fuelReq += ,@()
+			write-host "Step Check $global:Index complete"
+			ArrayController
+		}
+
+		elseif($rowTotalReq -eq 0) {
+			write-host $global:Index
+			write-host "####################"
+			Calculate
+		}
+}
+
+Function Calculate {
+	$total = @()
+	$counter = 1
+	while($counter -eq 1){
+		if($global:Index -gt 0) {
+			$rowTotalReq = 0
+			foreach($mass in $global:fuelReq[$global:Index]) {
+				$rowTotalReq = $rowTotalReq + $mass
+			}
+			$total += $rowTotalReq
+			$global:Index = $global:Index - 1
+		}
+		elseif($global:Index -eq 0) {
+			$counter = 0
+			foreach($num in $total) {
+				[int]$grandTotal = $grandTotal + $num
+			}
+			write-host "The final total is $grandTotal"
+		}
+	}
 }
 
 TextToPSList
-ArrayController
-$global:fuelReq[$global:Index]
-write-host "The thing worked!!"
-
-ArrayController
-$global:fuelReq[$global:Index]
-write-host "The thing worked twice!!"
-
-ArrayController
-$global:fuelReq[$global:Index]
-write-host "The thing worked thrice!!"
-
-
-# SCRATCHPAD:
-
-    # $fuelReq[0]
-	# write-host "###########################################"
-	# $fuelReq[1]
-	# $totalReq = 0
-	# foreach($req in $fuelReq) {
-	# $totalReq = $totalReq + $req
-	# }
-	# $totalReq
-	
-##########################################################################################
-	
-#All current code inline for testing:
-# $global:Index = 0
-
-# $global:fuelReq = ,@()
-# $global:fuelReq[0] += get-content -path .\day1input.txt
-
-# $global:fuelReq += ,@() #needs to be logic controlled
-# foreach($mass in $global:fuelReq[$global:Index]) { #need to functionize
-	# $m = ($mass / 3) - 2
-    # $m = [math]::floor($m)
-    # $global:fuelReq[$global:Index + 1] += $m
-# }
-# $global:Index = $global:Index + 1
-
-# $global:fuelReq[$global:Index]
