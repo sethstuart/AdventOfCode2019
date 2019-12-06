@@ -1,19 +1,15 @@
-$global:Index = 0
+$global:Index = 0 #A global variable is defined to use as the increment for the index of the arrays
 
 
 Function TextToPSList {
-    $global:fuelReq = ,@()
-	$global:fuelReq[$global:Index] += get-content -path .\testinput.txt
-	StepCheck
+	$global:fuelReq = ,@() # A new global multidimensional array is made. Fuel Requirement.
+	$global:fuelReq[$global:Index] += get-content -path .\day1input.txt #Using get-content, the specified file is parsed and lines are sent to Row 0
+	StepCheck # StepCheck is called.
 }
-
-#Next Steps: 
-# The checker also needs to see if all results in the next round will create values <= 0, and if so terminate the loop and tabulate values
-# Make a function that adds up all results from fuelReq[1] to fuelReq[n] into totalReq
 
 Function ArrayController {
 	foreach($mass in $global:fuelReq[$global:Index]) {
-	    $m = ($mass / 3) - 2
+		$m = ($mass / 3) - 2
 		$m = [math]::floor($m)
 		if($m -le 0) {
 			$global:fuelReq[$global:Index + 1] += 0
@@ -21,25 +17,23 @@ Function ArrayController {
 		else {
 			$global:fuelReq[$global:Index + 1] += $m
 		}
-		$global:Index = $global:Index + 1
-		StepCheck
 	}
+	$global:Index = $global:Index + 1
+	StepCheck
 }
 
 Function StepCheck {
-	$rowTotalReq = 0
-	foreach($mass in $global:fuelReq[$global:Index]) {
-		$rowTotalReq = $rowTotalReq + $mass
+	[int]$global:rowTotalReq = 0
+	foreach($mass in $global:fuelReq[$global:Index]) { # for each value in current row:
+		$global:rowTotalReq = $global:rowTotalReq + $mass #Add up the entire row
 	}
-		if($rowTotalReq -gt 0) {
+		if($global:rowTotalReq -gt 0) {
 			$global:fuelReq += ,@()
-			write-host "Step Check $global:Index complete"
+			write-host "Step Check $global:Index complete. Row Total is $global:rowTotalReq"
 			ArrayController
 		}
 
-		elseif($rowTotalReq -eq 0) {
-			write-host $global:Index
-			write-host "####################"
+		elseif($global:rowTotalReq -eq 0) {
 			Calculate
 		}
 }
@@ -49,19 +43,19 @@ Function Calculate {
 	$counter = 1
 	while($counter -eq 1){
 		if($global:Index -gt 0) {
-			$rowTotalReq = 0
+			[int]$TotalReq = 0
 			foreach($mass in $global:fuelReq[$global:Index]) {
-				$rowTotalReq = $rowTotalReq + $mass
+				$TotalReq = $TotalReq + $mass
 			}
-			$total += $rowTotalReq
+			$total += $TotalReq
 			$global:Index = $global:Index - 1
 		}
 		elseif($global:Index -eq 0) {
-			$counter = 0
 			foreach($num in $total) {
 				[int]$grandTotal = $grandTotal + $num
 			}
 			write-host "The final total is $grandTotal"
+			$counter = 0
 		}
 	}
 }
