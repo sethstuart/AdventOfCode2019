@@ -1,42 +1,85 @@
 [int]$global:posA = 0
 [int]$global:posB = 3
+[bool]$global:loop = $true
 
-Function ReadIntCode {
-	[string]$string += get-content -path .\day2input.txt
-	[array]$global:intCodeArray = $string.split(',')
-	$buffer += $global:intCodeArray[$global:posA..$global:posB]
-	if($buffer[$global:posA] -eq 1){
-		OpCode1
-		#return($buffer)
+while($global:loop -eq $true) {
+	Function BuildArray {
+		[string]$string += get-content -path .\day2input.txt
+		[array]$global:intCodeArray = $string.split(',')
+		ReadIntCode
 	}
-	elseif($buffer[$global:posA] -eq 2){
-		OpCode2
-		#return($buffer)
+	Function ReadIntCode {
+		[array]$codes = @(1,2,99)
+		[array]$global:buffer = @()
+		$global:buffer += $global:intCodeArray[$global:posA..$global:posB]
+		write-host "Next opcode is:" $global:buffer[0]
+		if($global:buffer[0] -eq 1){
+			OpCode1
+			#return($global:buffer)
+		}
+		elseif($global:buffer[0] -eq 2){
+			OpCode2
+			#return($global:buffer)
+		}
+		elseif($global:buffer[0] -eq 99){
+			OpCode99
+			#return($global:buffer)
+		}
+		elseif($global:buffer[$global:posA] -notcontains $codes){
+			write-host "Fault. Unexpected OpCode." 
+			$global:buffer
+			OpCode99
+		}
 	}
-	elseif($buffer[$global:posA] -eq 99){
-		OpCode99
-		#return($buffer)
+
+
+	Function Step {
+		write-host "PosA and PosB pre-step:" $global:posA "," $global:posB
+		$global:posA = $global:posA + 4
+		$global:posB = $global:posB + 4
+		write-host "PosA and PosB post-step:" $global:posA "," $global:posB
+		ReadIntCode
 	}
-	elseif($buffer[$global:posA] -notcontains @(1,2,99)){
-		write-host "Fault. Unexpected OpCode."
+
+	Function OpCode1() {
+		[int]$writePos = $global:buffer[3]
+		write-host "--------"
+		write-host "Buffer is:" $global:buffer
+		write-host "--------"
+		write-host "Write position is: $writePos"
+		write-host "--------"
+		[int]$valA = $global:intCodeArray[$global:buffer[1]]
+		[int]$valB = $global:intCodeArray[$global:buffer[2]]
+		write-host "The math looks like: $valA + $valB"
+		$global:intCodeArray[$writePos] = $valA + $valB
+		write-host "--------"
+		write-host "OpCode1 Result:" $global:intCodeArray[$writePos]
+		Step
 	}
-}
 
+	Function OpCode2() {
+		[int]$writePos = $global:buffer[3]
+		write-host "--------"
+		write-host "Buffer is: $global:buffer"
+		write-host "--------"
+		write-host "Write position is: $writePos"
+		write-host "--------"
+		[int]$valA = $global:intCodeArray[$global:buffer[1]]
+		[int]$valB = $global:intCodeArray[$global:buffer[2]]
+		write-host "The math looks like: $valA * $valB"
+		write-host "--------"
+		$global:intCodeArray[$writePos] = $valA * $valB
+		write-host "--------"
+		write-host "OpCode2 Result:" $global:intCodeArray[$writePos]
+		Step
+	}
 
-Function OpCode1() {
-	write-host "OpCode1"
-	$writePos = $buffer[3]
-	[int]$val = $global:intCodeArray[$buffer[1]] 
-	$global:intCodeArray[$writePos] += $val + $global:intCodeArray[$buffer[2]]
-	$global:intCodeArray[$writePos]
-	
+	Function OpCode99() {
+		$global:loop = $false
+		$global:intCodeArray[0]
+		# write-host "Final Array"
+		# $global:intCodeArray
+	}
+	write-host "Building Array"
+	BuildArray
 }
-
-Function OpCode2($buffer) {
-	write-host "OpCode2"
-}
-
-Function OpCode99($buffer) {
-	write-host "OpCode99"
-}
-ReadIntCode
